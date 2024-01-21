@@ -21,6 +21,18 @@ bool wsaKill(SOCKET serverSocket) {
     WSACleanup();
     return true;
 }
+void threadKill() {
+    for (auto& thread : clientHandler) {
+        if (thread.joinable()) {
+            thread.join();
+        }
+    }
+    for (auto& thread : listenerThread) {
+        if (thread.joinable()) {
+            thread.join();
+        }
+    }
+}
 
 int clientIndexNoConst(SOCKET clientSocket) {//Initial clientSocket index for data vectors. Not always the same, so no constant var...
     int tmpCount = -1;
@@ -31,6 +43,16 @@ int clientIndexNoConst(SOCKET clientSocket) {//Initial clientSocket index for da
         }
     }
     return tmpCount;
+}
+
+void console(SOCKET serverSocket) {
+    while (serverIsOn) {
+        std::string input;
+        std::cin >> input;
+        if (input == "exit") {
+            return;
+        }
+    }
 }
 
 void clienthandlerFunc(SOCKET clientSocket, sockaddr_in clientAddr) {
@@ -86,7 +108,7 @@ int main() {
     }
     SOCKET serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket == INVALID_SOCKET) {
-        std::cout << "The serverSocket is an invalid Socket type. Press enter to exit.\n";
+        std::cout << "This serverSocket is an invalid Socket type. Press enter to exit.\n";
         system("set /p end=");
         return 2;
     }
@@ -106,6 +128,8 @@ int main() {
     }
     serverIsOn = true;
     std::cout << "Success: Server is running on " << server_ip << ":" << server_port << "\n";
+    console(serverSocket);
+    threadKill();
     wsaKill(serverSocket);
     return 0;
 }
