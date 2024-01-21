@@ -1,120 +1,82 @@
-#include <vector>
-#include <thread>
-#include <chrono>
 #include <Windows.h>
 
-std::vector<std::thread> testVec;
-int playerX = 100;
-int playerY = 100;
 HWND hwnd;
-int fps = 120;
-
-void moveTest() {
-    const std::chrono::duration<double> fpsDur = std::chrono::duration<double>(1.0 / fps);
-
-    auto initialT = std::chrono::steady_clock::now();
-
-
-    while (true) {
-        auto currentT = std::chrono::steady_clock::now();
-        auto deltaTime = std::chrono::duration_cast<std::chrono::duration<double>>(currentT - initialT);
-
-        if (deltaTime >= fpsDur) {
-            ++playerX;
-
-            PostMessage(hwnd, WM_USER + 1, 0, 0);
-
-            initialT = currentT;
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
-    }
-}
+HBITMAP mainBitMap;
+HDC hdcMem; // Declaration of hdcMem
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    switch (uMsg) {
-        case WM_DESTROY:
-            PostQuitMessage(0);
-            return 0;
-        case WM_PAINT:
-            {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hwnd, &ps);
-
-            // Fill the entire client area with a background color
-            RECT clientRect;
-            GetClientRect(hwnd, &clientRect);
-            HBRUSH hBackgroundBrush = CreateSolidBrush(RGB(255, 255, 255)); // White
-            FillRect(hdc, &clientRect, hBackgroundBrush);
-            DeleteObject(hBackgroundBrush);
-
-            // Drawing code here
-            RECT rect = { playerX, playerY, playerX + 100, playerY + 100 };
-
-            // Create a red brush
-            HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 0)); // Red
-            // Select the red brush into the device context
-            HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
-
-            // Draw a filled rectangle
-            Rectangle(hdc, rect.left, rect.top, rect.right, rect.bottom);
-
-            // Restore the original brush
-            SelectObject(hdc, hOldBrush);
-            // Free the created brush
-            DeleteObject(hBrush);
-
-            EndPaint(hwnd, &ps);
-            }
-            return 0;
-        case WM_USER + 1:
-            // Update the window when notified
-            InvalidateRect(hwnd, NULL, TRUE);
-            UpdateWindow(hwnd);
-            return 0;
-        default:
-            return DefWindowProc(hwnd, uMsg, wParam, lParam);
+    if (uMsg == WM_DESTROY) {
+        PostQuitMessage(0);
+        return 0;
     }
+    else if (uMsg == WM_PAINT) {
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(hwnd, &ps);
+
+        if (mainBitMap != NULL) {
+            BITMAP bm;
+            GetObject(mainBitMap, sizeof(BITMAP), &bm);
+
+            // Calculate the target rectangle for scaling
+            RECT targetRect = {0, 0, 500, 500}; // Adjust as needed
+
+            // Use StretchBlt to scale and draw the image
+            StretchBlt(hdc, targetRect.left, targetRect.top, targetRect.right, targetRect.bottom,
+                       hdcMem, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
+        }
+
+        EndPaint(hwnd, &ps);
+    }
+    else {
+        return DefWindowProc(hwnd, uMsg, wParam, lParam);
+    }
+
+    return 0;
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-    FreeConsole(); // Detach from the console
+    // Load the image
+    mainBitMap = (HBITMAP)LoadImageW(NULL, L"assets/img/sun.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
+    // Check if image loading failed
+    if (mainBitMap == NULL) {
+        MessageBoxW(NULL, L"Image loading failed!", L"Error", MB_ICONERROR);
+        return 1;
+    }
+
+    // Create a compatible device context and select the bitmap into it
+    hdcMem = CreateCompatibleDC(NULL);
+    SelectObject(hdcMem, mainBitMap);
+
+    // Register window class
     WNDCLASSW wc = {};
     wc.lpfnWndProc = WindowProc;
     wc.hInstance = hInstance;
     wc.lpszClassName = L"MyWindowClass";
-
     RegisterClassW(&wc);
 
-    hwnd = CreateWindowExW(
-        0,
-        L"MyWindowClass",
-        L"M",
-        WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT,
-        CW_USEDEFAULT,
-        500,
-        500,
-        NULL,
-        NULL,
-        hInstance,
-        NULL
-    );
+    // Create the window
+    hwnd = CreateWindowExW(0, L"MyWindowClass", L"M", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 500, 500, NULL, NULL, hInstance, NULL);
 
+    // Check if window creation failed
     if (hwnd == NULL) {
         MessageBoxW(NULL, L"Window creation failed!", L"Error", MB_ICONERROR);
         return 1;
     }
 
+    // Show and update the window
     ShowWindow(hwnd, nCmdShow);
     UpdateWindow(hwnd);
-    testVec.emplace_back(moveTest);
 
+    // Message loop
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0)) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
+
+    // Cleanup: Delete the compatible device context
+    DeleteDC(hdcMem);
 
     return 0;
 }
