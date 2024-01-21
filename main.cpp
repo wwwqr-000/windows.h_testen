@@ -7,7 +7,7 @@ std::vector<std::thread> testVec;
 int playerX = 100;
 int playerY = 100;
 HWND hwnd;
-int fps = 144;
+int fps = 120;
 
 void moveTest() {
     const std::chrono::duration<double> fpsDur = std::chrono::duration<double>(1.0 / fps);
