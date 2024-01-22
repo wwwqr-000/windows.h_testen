@@ -1,0 +1,13 @@
+# depslib dependency file v1.0
+1705856492 source:c:\users\za2qa\desktop\background-apps\whiteavocado-git\windows.h_testen\socket test\socket server\main.cpp
+	<iostream>
+	<vector>
+	<thread>
+	<winsock2.h>
+
+1705949868 source:g:\githubdesktopworkspace\passwordsmanytomuch\windows.h_testen\socket test\server\main.cpp
+	<iostream>
+	<vector>
+	<thread>
+	<winsock2.h>
+
