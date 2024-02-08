@@ -6,6 +6,7 @@ HDC hdcMem; // Declaration of hdcMem
 const int worldHeight = 10;
 const int worldWidth = 10;
 int world[worldHeight][worldWidth];
+int dirtTest[worldHeight][worldWidth];
 
 
 void genWorld() {
@@ -48,6 +49,10 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                         break;
                         case 2://Dirt
                             StretchBlt(hdc, incr2/*x positie in window*/, incr1/*y positie in window*/, (128 / 2)/*Width*/, (64 / 2)/*Height*/, hdcMem, 2/*x positie bitmap offset*/, 1, (bm.bmWidth - 2), (bm.bmHeight - 2), SRCCOPY);
+                            dirtTest[0][0] = incr2;
+                            dirtTest[0][1] = incr1;
+                            dirtTest[0][2] = 128 / 2;
+                            dirtTest[0][3] = 64 / 2;
                         break;
                     }
                 }
