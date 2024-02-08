@@ -59,7 +59,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                 }
             }
         }
-
+        RECT rect = {50, 50, 200, 100};
+        DrawText(hdc, "Test", -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
         EndPaint(hwnd, &ps);
     }
     else if (uMsg == WM_LBUTTONDOWN) {
