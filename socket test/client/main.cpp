@@ -1,4 +1,5 @@
 #include <Windows.h>
+#include <windowsx.h>
 
 HWND hwnd;
 HBITMAP mainBitMap;
@@ -60,6 +61,14 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         }
 
         EndPaint(hwnd, &ps);
+    }
+    else if (uMsg == WM_LBUTTONDOWN) {
+        int cursor[2];
+        cursor[1] = GET_Y_LPARAM(lParam);
+        cursor[0] = GET_X_LPARAM(lParam);
+        if (cursor[0] >= dirtTest[0][0] && cursor[0] <= dirtTest[0][0] + dirtTest[0][3] && cursor[1] >= dirtTest[0][1] && cursor[1] <= dirtTest[0][1] + dirtTest[0][3]) {
+            MessageBox(hwnd, "Dirt detected!", "click", MB_OK | MB_ICONINFORMATION);
+        }
     }
     else {
         return DefWindowProc(hwnd, uMsg, wParam, lParam);
