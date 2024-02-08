@@ -29,7 +29,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             * 2: ImgSize in pixels
             * 3: offset binnen image
             */
-            StretchBlt(hdc, 10, 10, 120, 64, hdcMem, 18, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
+            StretchBlt(hdc, 10/*x positie in window*/, 10/*y positie in window*/, 120/*Width*/, 64, hdcMem, 18, 1, (bm.bmWidth - 2), (bm.bmHeight - 2), SRCCOPY);
 
         }
 

@@ -18,7 +18,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             GetObject(mainBitMap, sizeof(BITMAP), &bm);
 
             // Calculate the target rectangle for scaling
-            RECT targetRect = {0, 0, 500, 500}; // Adjust as needed
+            RECT targetRect = {0, 0, 200, 200}; // Adjust as needed
 
             // Use StretchBlt to scale and draw the image
             StretchBlt(hdc, targetRect.left, targetRect.top, targetRect.right, targetRect.bottom,
