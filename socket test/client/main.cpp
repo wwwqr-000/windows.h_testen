@@ -3,7 +3,18 @@
 HWND hwnd;
 HBITMAP mainBitMap;
 HDC hdcMem; // Declaration of hdcMem
+const int worldHeight = 10;
+const int worldWidth = 10;
+int world[worldHeight][worldWidth];
 
+
+void genWorld() {
+    for (int y = 0; y < worldHeight; y++) {
+        for (int x = 0; x < worldWidth; x++) {
+            world[y][x] = 1;//Stone
+        }
+    }
+}
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     if (uMsg == WM_DESTROY) {
         PostQuitMessage(0);
@@ -29,8 +40,18 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             * 2: ImgSize in pixels
             * 3: offset binnen image
             */
-            StretchBlt(hdc, 10/*x positie in window*/, 10/*y positie in window*/, 120/*Width*/, 64, hdcMem, 18, 1, (bm.bmWidth - 2), (bm.bmHeight - 2), SRCCOPY);
-
+            for (int y = 0, incr1 = 0; y < worldHeight; y++, incr1 += 31) {
+                for (int x = 0, incr2 = 0; x < worldWidth; x++, incr2 += 31) {
+                    switch (world[y][x]) {
+                        case 1://Stone
+                            StretchBlt(hdc, incr2/*x positie in window*/, incr1/*y positie in window*/, (128 / 2)/*Width*/, (64 / 2)/*Height*/, hdcMem, 19/*x positie bitmap offset*/, 1, (bm.bmWidth - 2), (bm.bmHeight - 2), SRCCOPY);
+                        break;
+                        case 2://Dirt
+                            StretchBlt(hdc, incr2/*x positie in window*/, incr1/*y positie in window*/, (128 / 2)/*Width*/, (64 / 2)/*Height*/, hdcMem, 2/*x positie bitmap offset*/, 1, (bm.bmWidth - 2), (bm.bmHeight - 2), SRCCOPY);
+                        break;
+                    }
+                }
+            }
         }
 
         EndPaint(hwnd, &ps);
@@ -43,6 +64,9 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+
+    genWorld();
+    world[2][2] = 2;
 
     mainBitMap = (HBITMAP)LoadImageW(NULL, L"assets/img/Blocks.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
@@ -73,7 +97,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     MSG msg;
     while (true) {
-        InvalidateRect(hwnd, NULL, FALSE);
+        //InvalidateRect(hwnd, NULL, FALSE);
         UpdateWindow(hwnd);
 
         while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
@@ -81,7 +105,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             DispatchMessage(&msg);
         }
 
-        Sleep(16);
+        Sleep(20);
     }
 
     DeleteDC(hdcMem);
