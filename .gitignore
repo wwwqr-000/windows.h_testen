@@ -3,3 +3,8 @@ gui test 1/bin/Debug/gui.exe
 gui test 1/gui.cbp
 gui test 1/gui.depend
 gui test 1/obj/Debug/main.o
+gui test 1/bin/Debug/gui test.exe
+gui test 1/gui test.cbp
+gui test 1/gui test.depend
+gui test 1/gui test.layout
+gui test 1/main.o

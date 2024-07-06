@@ -6,11 +6,14 @@
 
 #include <tchar.h>
 #include <windows.h>
+#include <windowsx.h>
 #include "classes/dimensions.hpp"
 #include "classes/bmp.hpp"
 
 std::vector<bmp> textures;
 bool startup = true;
+int window_width = 600;
+int window_height = 600;
 
 void createTextures() {
     std::string testPath = "assets/textures/pfp.bmp";
@@ -66,8 +69,8 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
            WS_OVERLAPPEDWINDOW, /* default window */
            CW_USEDEFAULT,       /* Windows decides the position */
            CW_USEDEFAULT,       /* where the window ends up on the screen */
-           600,                 /* The programs width */
-           600,                 /* and height in pixels */
+           window_width,                 /* The programs width */
+           window_height,                 /* and height in pixels */
            HWND_DESKTOP,        /* The window is a child-window to desktop */
            NULL,                /* No menu */
            hThisInstance,       /* Program Instance handler */
@@ -117,20 +120,38 @@ void startupPaint(HWND& hwnd) {
     }
 }
 
+point2 getClickPos(LPARAM& lParam) {
+    return point2 { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+}
+
+void leftClick(LPARAM& lParam, HWND& hwnd) {
+    point2 click = getClickPos(lParam);
+    std::wstring message = L"Left button clicked at (" + std::to_wstring(click.x_i) + L", " + std::to_wstring(click.y_i) + L")";
+    MessageBoxW(hwnd, message.c_str(), L"Click", MB_OK);
+
+}
+
+void rightClick(LPARAM& lParam, HWND& hwnd) {
+
+}
+
 
 /*  This function is called by the Windows function DispatchMessage()  */
-LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    switch (message)                  /* handle the messages */
-    {
+LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    switch (message) {
         case WM_DESTROY:
             PostQuitMessage (0);       /* send a WM_QUIT to the message queue */
+            break;
+        case WM_LBUTTONDOWN:
+            leftClick(lParam, hwnd);
+            break;
+        case WM_RBUTTONDOWN:
+            rightClick(lParam, hwnd);
             break;
         case WM_PAINT:
             startupPaint(hwnd);
         default:                      /* for messages that we don't deal with */
             return DefWindowProc (hwnd, message, wParam, lParam);
     }
-
     return 0;
 }
