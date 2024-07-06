@@ -6,6 +6,21 @@
 
 #include <tchar.h>
 #include <windows.h>
+#include "classes/dimensions.hpp"
+#include "classes/bmp.hpp"
+
+std::vector<bmp> textures;
+bool startup = true;
+
+void createTextures() {
+    std::string testPath = "assets/textures/pfp.bmp";
+    bmp test(testPath, 96, 96, 10, 10);
+    int stat = -1;
+    test.createPixels(stat);
+    if (stat == 0) {
+        textures.emplace_back(test);
+    }
+}
 
 /*  Declare Windows procedure  */
 LRESULT CALLBACK WindowProcedure (HWND, UINT, WPARAM, LPARAM);
@@ -47,12 +62,12 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
     hwnd = CreateWindowEx (
            0,                   /* Extended possibilites for variation */
            szClassName,         /* Classname */
-           _T("Code::Blocks Template Windows App"),       /* Title Text */
+           _T("Test GUI 1"),       /* Title Text */
            WS_OVERLAPPEDWINDOW, /* default window */
            CW_USEDEFAULT,       /* Windows decides the position */
            CW_USEDEFAULT,       /* where the window ends up on the screen */
-           544,                 /* The programs width */
-           375,                 /* and height in pixels */
+           600,                 /* The programs width */
+           600,                 /* and height in pixels */
            HWND_DESKTOP,        /* The window is a child-window to desktop */
            NULL,                /* No menu */
            hThisInstance,       /* Program Instance handler */
@@ -61,6 +76,8 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
 
     /* Make the window visible on the screen */
     ShowWindow (hwnd, nCmdShow);
+
+    createTextures();//Create texture files
 
     /* Run the message loop. It will run until GetMessage() returns 0 */
     while (GetMessage (&messages, NULL, 0, 0))
@@ -75,9 +92,33 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
     return messages.wParam;
 }
 
+bool range(int num, int minimal = 220, int maximal = 255) {
+    return num >= minimal && num <= maximal;
+}
+
+void startupPaint(HWND& hwnd) {
+    HDC hdc = GetDC(hwnd);
+    COLORREF color = RGB(0, 0, 0);
+    for (auto& texture : textures) {
+        if (texture.isPainted()) {
+            //continue;
+        }
+        for (int x = 0; x < texture.getWidth(); x++) {
+            for (int y = 0; y < texture.getHeight(); y++) {
+                point3 coord = texture.getPixelValue(x, y);
+                if (range(coord.x_i) && range(coord.y_i) && range(coord.z_i)) {//Alpha value
+                    continue;
+                }
+                color = RGB(coord.x_i, coord.y_i, coord.z_i);
+                SetPixel(hdc, x + texture.getWOf(), y + texture.getHOf(), color);
+            }
+        }
+        texture.setPainted(true);
+    }
+}
+
 
 /*  This function is called by the Windows function DispatchMessage()  */
-
 LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)                  /* handle the messages */
@@ -85,6 +126,8 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         case WM_DESTROY:
             PostQuitMessage (0);       /* send a WM_QUIT to the message queue */
             break;
+        case WM_PAINT:
+            startupPaint(hwnd);
         default:                      /* for messages that we don't deal with */
             return DefWindowProc (hwnd, message, wParam, lParam);
     }
