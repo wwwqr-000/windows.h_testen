@@ -92,7 +92,7 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
     return messages.wParam;
 }
 
-bool range(int num, int minimal = 220, int maximal = 255) {
+bool alphaRange(int num, int minimal = 220, int maximal = 255) {
     return num >= minimal && num <= maximal;
 }
 
@@ -106,7 +106,7 @@ void startupPaint(HWND& hwnd) {
         for (int x = 0; x < texture.getWidth(); x++) {
             for (int y = 0; y < texture.getHeight(); y++) {
                 point3 coord = texture.getPixelValue(x, y);
-                if (range(coord.x_i) && range(coord.y_i) && range(coord.z_i)) {//Alpha value
+                if (alphaRange(coord.x_i) && alphaRange(coord.y_i) && alphaRange(coord.z_i)) {//Alpha check
                     continue;
                 }
                 color = RGB(coord.x_i, coord.y_i, coord.z_i);
